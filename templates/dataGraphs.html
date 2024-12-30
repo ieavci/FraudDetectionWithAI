@@ -1,0 +1,31 @@
+<div class="container my-4">
+    <h1 class="text-center mb-4">Sahtecilik Tespit Panosu</h1>
+
+    <!-- Görsel Listesi -->
+    <section class="mb-5">
+        <h2>Görselleştirmeler</h2>
+        <ul class="list-group">
+            {% for idx, vis_name in enumerate(visualization_names) %}
+            <li class="list-group-item">
+                <a href="#" class="visualization-link" data-id="{{ idx }}">{{ vis_name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="visualizationModal" tabindex="-1" aria-labelledby="visualizationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="visualizationModalLabel">Görselleştirme</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="visualizationContent" style="text-align: center;">Yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

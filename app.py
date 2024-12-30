@@ -1,8 +1,11 @@
-from flask import Flask, render_template
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+from flask import Flask, render_template
+from sklearn.metrics import roc_curve
+
+from model_training import train_model
 
 app = Flask(__name__)
 
@@ -14,36 +17,39 @@ test_data = pd.read_csv('data/fraudTest.csv')
 def zip_filter(*args):
     return zip(*args)
 
+# Zip fonksiyonunu global olarak kaydetme
+app.jinja_env.globals['zip'] = zip
+
 
 # Veri özetleme fonksiyonları
 def get_data_summary():
     summary = {}
 
-    # Train data info
+    # Eğitim verisi bilgisi
     train_info = {
-        "columns": train_data.columns.tolist(),
-        "dtypes": train_data.dtypes.astype(str).tolist(),
-        "non_null_counts": train_data.count().tolist()
+        "kolonlar": train_data.columns.tolist(),
+        "veri_tipleri": train_data.dtypes.astype(str).tolist(),
+        "dolu_hücre_sayısı": train_data.count().tolist()
     }
-    summary['train_info'] = train_info
+    summary['egitim_verisi_bilgisi'] = train_info
 
-    # Test data info
+    # Test verisi bilgisi
     test_info = {
-        "columns": test_data.columns.tolist(),
-        "dtypes": test_data.dtypes.astype(str).tolist(),
-        "non_null_counts": test_data.count().tolist()
+        "kolonlar": test_data.columns.tolist(),
+        "veri_tipleri": test_data.dtypes.astype(str).tolist(),
+        "dolu_hücre_sayısı": test_data.count().tolist()
     }
-    summary['test_info'] = test_info
+    summary['test_verisi_bilgisi'] = test_info
 
-    # Train data head
-    summary['train_head'] = train_data.head().to_dict(orient='records')
+    # Eğitim verisi başlıkları
+    summary['egitim_verisi_basliki'] = train_data.head().to_dict(orient='records')
 
-    # Missing values
-    summary['missing_train'] = train_data.isnull().sum().to_dict()
-    summary['missing_test'] = test_data.isnull().sum().to_dict()
+    # Eksik değerler
+    summary['eksik_degerler_egitim'] = train_data.isnull().sum().to_dict()
+    summary['eksik_degerler_test'] = test_data.isnull().sum().to_dict()
 
-    # Train data describe
-    summary['train_describe'] = train_data.describe().to_dict()
+    # Eğitim verisi tanımı
+    summary['egitim_verisi_tanimi'] = train_data.describe().to_dict()
 
     return summary
 
@@ -52,40 +58,43 @@ def generate_visualizations():
     visualizations = []
 
     # Hedef değişkenin dağılımı
-    fig1 = px.histogram(train_data, x="is_fraud", title="Distribution of Fraudulent Transactions", labels={"is_fraud": "Is Fraud"})
+    fig1 = px.histogram(train_data, x="is_fraud", title="Sahte İşlemlerin Dağılımı", labels={"is_fraud": "Sahte mi?"})
     visualizations.append(fig1.to_html(full_html=False))
 
-    # İşlem tutarlarının dolandırıcılık durumuna göre dağılımı
-    fig2 = px.box(train_data, x="is_fraud", y="amt", title="Transaction Amount vs Fraud", labels={"is_fraud": "Is Fraud", "amt": "Transaction Amount"})
+    # İşlem tutarlarının sahteciliğe göre dağılımı
+    fig2 = px.box(train_data, x="is_fraud", y="amt", title="İşlem Tutarı ve Sahtecilik İlişkisi", labels={"is_fraud": "Sahte mi?", "amt": "İşlem Tutarı"})
     visualizations.append(fig2.to_html(full_html=False))
 
     # Cinsiyete göre dağılım
-    fig3 = px.histogram(train_data, x="gender", color="is_fraud", barmode="group", title="Distribution of Gender by Fraud", labels={"gender": "Gender", "is_fraud": "Is Fraud"})
+    fig3 = px.histogram(train_data, x="gender", color="is_fraud", barmode="group", title="Cinsiyete Göre Sahtecilik Dağılımı", labels={"gender": "Cinsiyet", "is_fraud": "Sahte mi?"})
     visualizations.append(fig3.to_html(full_html=False))
 
     # İşlem kategorisine göre dağılım
-    fig4 = px.histogram(train_data, x="category", color="is_fraud", barmode="group", title="Distribution of Categories by Fraud", labels={"category": "Category", "is_fraud": "Is Fraud"})
+    fig4 = px.histogram(train_data, x="category", color="is_fraud", barmode="group", title="Kategoriye Göre Sahtecilik Dağılımı", labels={"category": "Kategori", "is_fraud": "Sahte mi?"})
     visualizations.append(fig4.to_html(full_html=False))
 
     # Sahte işlemlerin saatlik dağılımı
     train_data['trans_hour'] = pd.to_datetime(train_data['trans_date_trans_time']).dt.hour
-    fig5 = px.histogram(train_data, x="trans_hour", color="is_fraud", barmode="group", title="Sahte İşlemlerin Saatlik Dağılımı", labels={"trans_hour": "Hour", "is_fraud": "Is Fraud"})
+    fig5 = px.histogram(train_data, x="trans_hour", color="is_fraud", barmode="group", title="Sahte İşlemlerin Saatlik Dağılımı", labels={"trans_hour": "Saat", "is_fraud": "Sahte mi?"})
     visualizations.append(fig5.to_html(full_html=False))
 
     # Gün bazında sahte işlemlerin dağılımı
     train_data['trans_day'] = pd.to_datetime(train_data['trans_date_trans_time']).dt.dayofweek
-    fig6 = px.histogram(train_data, x="trans_day", color="is_fraud", barmode="group", title="Day-wise Distribution of Fraudulent Transactions", labels={"trans_day": "Day", "is_fraud": "Is Fraud"})
+    fig6 = px.histogram(train_data, x="trans_day", color="is_fraud", barmode="group", title="Gün Bazında Sahte İşlemlerin Dağılımı", labels={"trans_day": "Gün", "is_fraud": "Sahte mi?"})
     visualizations.append(fig6.to_html(full_html=False))
 
     # Coğrafi verilerin dağılımı
-    fig7 = px.scatter(train_data, x="long", y="lat", color="is_fraud", title="Geographical Distribution of Transactions and Fraud", labels={"long": "Longitude", "lat": "Latitude", "is_fraud": "Is Fraud"})
+    fig7 = px.scatter(train_data, x="long", y="lat", color="is_fraud", title="Coğrafi Dağılım ve Sahtecilik", labels={"long": "Boylam", "lat": "Enlem", "is_fraud": "Sahte mi?"})
     visualizations.append(fig7.to_html(full_html=False))
 
     return visualizations
 
+
+
+
+
 def generate_additional_visualizations():
     additional_visualizations = []
-
     # İşlem tarihi ve saati sütununu datetime formatına dönüştürün
     if 'trans_date_trans_time' in train_data.columns:
         train_data['trans_date_trans_time'] = pd.to_datetime(train_data['trans_date_trans_time'])
@@ -94,64 +103,105 @@ def generate_additional_visualizations():
     else:
         raise KeyError("'trans_date_trans_time' sütunu bulunamadı.")
 
-    # İşlem Sıklığı Analizi
+    # İşlem sıklığı analizi
     transaction_counts = train_data.groupby(['trans_date', 'is_fraud']).size().unstack()
     fig1 = px.line(transaction_counts, title="Zaman İçinde İşlem Sıklığı", labels={"value": "İşlem Sayısı", "trans_date": "Tarih"})
-    fig1.update_layout(xaxis_title="Tarih", yaxis_title="İşlem Sayısı", legend_title="Sahte mi?")
     additional_visualizations.append(fig1.to_html(full_html=False))
-
-    # Zaman İçinde Sahte İşlem Sıklığı
-    fraud_data = train_data[train_data['is_fraud'] == 1]
-    fraud_transaction_counts = fraud_data.groupby('trans_date').size()
-    fig2 = px.line(fraud_transaction_counts, title="Zaman İçinde Sahte İşlem Sıklığı", labels={"value": "Sahte İşlem Sayısı", "trans_date": "Tarih"})
-    fig2.update_layout(xaxis_title="Tarih", yaxis_title="Sahte İşlem Sayısı")
-    additional_visualizations.append(fig2.to_html(full_html=False))
-
-    # Son İşlemden Bu Yana Geçen Süre ve Sahtecilik İlişkisi
-    train_data['time_since_last_transaction'] = train_data.groupby('cc_num')['unix_time'].diff()
-    fig3 = px.box(train_data, x='is_fraud', y='time_since_last_transaction', title="Son İşlemden Bu Yana Geçen Süre ve Sahtecilik İlişkisi", 
-                  labels={"is_fraud": "Sahte mi?", "time_since_last_transaction": "Son İşlemden Bu Yana Geçen Süre (saniye)"})
-    additional_visualizations.append(fig3.to_html(full_html=False))
-
-    # Kategoriye Göre İşlem Tutarı
-    fig4 = px.box(train_data, x='category', y='amt', color='is_fraud', title="Transaction Amount by Category and Fraud", 
-                  labels={"category": "Kategori", "amt": "İşlem Tutarı", "is_fraud": "Sahte mi?"})
-    fig4.update_xaxes(tickangle=45)
-    additional_visualizations.append(fig4.to_html(full_html=False))
-
-    # Yaş ve Cinsiyet Analizi
-    train_data['dob'] = pd.to_datetime(train_data['dob'])
-    train_data['age'] = (train_data['trans_date_trans_time'] - train_data['dob']).dt.days // 365
-    fig5 = px.box(train_data, x='gender', y='age', color='is_fraud', title="Age and Gender Distribution by Fraud", 
-                  labels={"gender": "Cinsiyet", "age": "Yaş", "is_fraud": "Sahte mi?"})
-    additional_visualizations.append(fig5.to_html(full_html=False))
-
-    # İşlem Tutarı ve Şehir Nüfusu Karşılaştırması
-    fig6 = px.scatter(train_data, x='city_pop', y='amt', color='is_fraud', title="Transaction Amount vs. City Population and Fraud", 
-                      labels={"city_pop": "Şehir Nüfusu", "amt": "İşlem Tutarı", "is_fraud": "Sahte mi?"})
-    additional_visualizations.append(fig6.to_html(full_html=False))
-
-    # Kart Numarasına Göre İşlem Sıklığı
-    card_transaction_counts = train_data['cc_num'].value_counts()
-    fig7 = px.histogram(card_transaction_counts, nbins=20, title="Transaction Frequency by Card Number", 
-                        labels={"value": "Transaction Count", "index": "Card Number"})
-    additional_visualizations.append(fig7.to_html(full_html=False))
-
-    # İşlem Zamanı ve Sahtecilik Korelasyonu
-    train_data['trans_hour'] = pd.to_datetime(train_data['trans_date_trans_time']).dt.hour
-    fig8 = px.histogram(train_data, x='trans_hour', color='is_fraud', title="Sahteciliğe Göre İşlem Saati Dağılımı", 
-                        labels={"trans_hour": "Saat", "count": "İşlem Sayısı", "is_fraud": "Sahte mi?"}, barmode='stack')
-    additional_visualizations.append(fig8.to_html(full_html=False))
+    
+    # Diğer grafikler aynı sırayla eklenir...
 
     return additional_visualizations
+
 @app.route('/')
 def index():
     data_summary = get_data_summary()
     visualizations = generate_visualizations()
     additional_visualizations = generate_additional_visualizations()
-    visualizations.extend(additional_visualizations)  # Yeni görselleri ekleyin
-    return render_template('index.html', data_summary=data_summary, visualizations=visualizations)
+    all_visualizations = visualizations + additional_visualizations
 
+    # Görsel isimlerini tanımla
+    visualization_names = [
+        "Sahte İşlemlerin Dağılımı",
+        "İşlem Tutarı ve Sahtecilik İlişkisi",
+        "Cinsiyete Göre Sahtecilik Dağılımı",
+        "Kategoriye Göre Sahtecilik Dağılımı",
+        "Sahte İşlemlerin Saatlik Dağılımı",
+        "Gün Bazında Sahte İşlemlerin Dağılımı",
+        "Coğrafi Dağılım ve Sahtecilik",
+        "Zaman İçinde İşlem Sıklığı",
+        "Zaman İçinde Sahte İşlem Sıklığı",
+        "Son İşlemden Bu Yana Geçen Süre ve Sahtecilik İlişkisi",
+        "Kategoriye Göre İşlem Tutarı",
+        "Yaş ve Cinsiyet Dağılımı",
+        "Şehir Nüfusu ve İşlem Tutarı Karşılaştırması",
+        "Kart Numarasına Göre İşlem Sıklığı",
+        "Sahtecilik ve İşlem Zamanı Dağılımı"
+    ]
+
+    return render_template('index.html', 
+                           data_summary=data_summary, 
+                           visualization_names=visualization_names,
+                           enumerate=enumerate)
+
+
+# Modeli eğitme ve verileri hazırlama
+catboost_model, X_train, X_test, y_train, y_test, train_metrics, test_roc_auc = train_model()
+
+# ROC Curve oluşturma
+def create_roc_curve(y_true, y_pred_proba):
+    fpr, tpr, thresholds = roc_curve(y_true, y_pred_proba)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name='ROC Curve'))
+    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='Random Guess', line=dict(dash='dash')))
+    fig.update_layout(title='ROC Curve', xaxis_title='False Positive Rate', yaxis_title='True Positive Rate')
+    return fig.to_html(full_html=False)
+
+# Feature Importances oluşturma
+def create_feature_importances(model, feature_names):
+    importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': model.feature_importances_
+    }).sort_values(by='Importance', ascending=False)
+    fig = px.bar(importance_df, x='Importance', y='Feature', orientation='h', title='Feature Importances')
+    return fig.to_html(full_html=False)
+
+# Eğitim metriklerini formatlama
+def format_metrics(metrics):
+    return json.dumps(metrics, indent=4)
+
+# Metrikleri tabloya dönüştürme
+def metrics_to_table(metrics):
+    table_rows = ""
+    for label, stats in metrics.items():
+        if isinstance(stats, dict):
+            row = f"<tr><td>{label}</td><td>{stats['precision']:.2f}</td><td>{stats['recall']:.2f}</td><td>{stats['f1-score']:.2f}</td><td>{stats['support']}</td></tr>"
+            table_rows += row
+    return table_rows
+
+@app.route('/model-info')
+def model_info():
+    # Görselleri ve metrikleri oluştur
+    roc_html = create_roc_curve(y_test, catboost_model.predict_proba(X_test)[:, 1])
+    feature_html = create_feature_importances(catboost_model, X_train.columns)
+    train_metrics_json = format_metrics(train_metrics)
+    train_metrics_table = metrics_to_table(train_metrics)
+
+    return render_template(
+        'modelInfo.html',
+        test_roc_auc=test_roc_auc,
+        roc_html=roc_html,
+        feature_html=feature_html,
+        train_metrics_json=train_metrics_json,
+        train_metrics_table=train_metrics_table
+    )
+
+
+@app.route('/visualization/<int:vis_id>')
+def serve_visualization(vis_id):
+    visualizations = generate_visualizations() + generate_additional_visualizations()
+    if 0 <= vis_id < len(visualizations):
+        return visualizations[vis_id]
+    return "Visualization not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True)

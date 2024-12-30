@@ -1,0 +1,56 @@
+<div id="header" class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-12 text-center">
+            <h3 class="display-4 fw-bold text-primary">Proje Hakkında</h3>
+            <p class="lead text-secondary">Bu proje, kredi kartı işlemlerindeki sahtecilik tespitini amaçlayan bir veri
+                bilimi çalışmasıdır. Veri seti, sahtecilik (fraud) ve gerçek (legitimate) işlemleri içermektedir. Veri,
+                1 Ocak 2019 - 31 Aralık 2020 tarihleri arasında gerçekleştirilen kredi kartı işlemlerini simüle
+                etmektedir ve 1000 müşteriye ait işlemleri kapsamaktadır. Bu müşteriler, 800 farklı satıcı (merchant)
+                ile alışveriş yapmıştır.</p>
+        </div>
+    </div>
+
+    <div class="py-4">
+        <div class="col-lg-12 col-md-12">
+            <h3 class="fw-bold text-dark">Veri Seti İçeriği</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Simüle edilen kredi kartı işlemleri, <a
+                        href="https://github.com/namebrandon/Sparkov_Data_Generation" target="_blank"><span
+                            class="text-primary fw-bold">Sparkov Data
+                            Generation | Github</span></a> aracı
+                    kullanılarak oluşturulmuştur.</li>
+                <li class="list-group-item">Veri seti, farklı müşteri profilleri (yaş, cinsiyet, kentsel/kırsal alan
+                    gibi) dikkate alınarak çeşitli şekillerde üretilmiştir.</li>
+                <li class="list-group-item">Her işlemin miktarı, günün hangi saatinde gerçekleştiği ve hangi kategoride
+                    olduğu gibi bilgiler içermektedir.</li>
+                <li class="list-group-item">Dengesiz bir veri setidir, bu da sahtecilik işlemlerinin oranının gerçek
+                    işlemlere kıyasla çok daha düşük olduğunu gösterir.</li>
+            </ul>
+        </div>
+        <div class="col-lg-12 col-md-12 py-4">
+            <h3 class="fw-bold text-dark">Proje Kapsamı ve Kullanılan Yöntemler</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Bu projede, dengesiz veri setlerinde etkili performans gösteren <span
+                        class="text-primary fw-bold">CatBoost</span> algoritması kullanılmıştır. CatBoost, kategorik
+                    verileri etkin bir şekilde işleyebilmesi ve dengesiz veri setleriyle başa çıkabilmesi nedeniyle bu
+                    proje
+                    için özellikle tercih edilmiştir. Projede ayrıca veri ön işleme, özellik mühendisliği ve model
+                    değerlendirme çalışmaları da gerçekleştirilmiştir.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="py-4">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark">Proje Çıkarımları</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Sahtecilik işlemlerinin, genellikle belirli satıcı kategorilerinde ve
+                    alışılmışın dışında olan saatlerde gerçekleştiği gözlemlenmiştir.</li>
+                <li class="list-group-item">Gerçek işlemlere kıyasla sahtecilik işlemlerinin daha düşük tutarlı olduğu
+                    tespit edilmiştir.</li>
+                <li class="list-group-item">CatBoost modeli, dengesiz veri setindeki özellikleri çok iyi ayrıştırabilmiş
+                    ve yüksek doğruluk oranları elde edilmiştir.</li>
+            </ul>
+        </div>
+    </div>
+</div>
