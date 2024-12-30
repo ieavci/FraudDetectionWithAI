@@ -4,6 +4,10 @@ import plotly.graph_objects as go
 import json
 from flask import Flask, render_template
 from sklearn.metrics import roc_curve
+import os
+from flask import Flask, render_template, request, redirect, url_for
+from model_training import train_model
+from model_storage import save_model, load_model, list_saved_models
 
 from model_training import train_model
 
@@ -145,7 +149,7 @@ def index():
 
 
 # Modeli eğitme ve verileri hazırlama
-catboost_model, X_train, X_test, y_train, y_test, train_metrics, test_roc_auc = train_model()
+#catboost_model, X_train, X_test, y_train, y_test, train_metrics, test_roc_auc = train_model()
 
 # ROC Curve oluşturma
 def create_roc_curve(y_true, y_pred_proba):
@@ -178,22 +182,55 @@ def metrics_to_table(metrics):
             table_rows += row
     return table_rows
 
-@app.route('/model-info')
-def model_info():
-    # Görselleri ve metrikleri oluştur
-    roc_html = create_roc_curve(y_test, catboost_model.predict_proba(X_test)[:, 1])
-    feature_html = create_feature_importances(catboost_model, X_train.columns)
-    train_metrics_json = format_metrics(train_metrics)
-    train_metrics_table = metrics_to_table(train_metrics)
+# Model ayarlarının saklanacağı dizin
+MODELS_DIR = "models/saved_models"
+if not os.path.exists(MODELS_DIR):
+    os.makedirs(MODELS_DIR)
 
+# Model formu sayfası
+@app.route('/model-form', methods=['GET', 'POST'])
+def model_form():
+    if request.method == 'POST':
+        # Kullanıcı tarafından girilen değerleri al
+        iterations = int(request.form['iterations'])
+        depth = int(request.form['depth'])
+        learning_rate = float(request.form['learning_rate'])
+        random_seed = int(request.form['random_seed'])
+
+        # Modeli eğit ve kaydet
+        model_id, model_info = train_model(iterations, depth, learning_rate, random_seed)
+        save_model(model_id, model_info)
+
+        # Model bilgi sayfasına yönlendir
+        return redirect(url_for('model_info', model_id=model_id))
+
+    return render_template('modelForm.html')
+
+# Model bilgi sayfası
+@app.route('/model-info/<model_id>')
+def model_info(model_id):
+    # Modeli yükle
+    model_info = load_model(model_id)
+    if not model_info:
+        return "Model bulunamadı.", 404
+
+    # Model bilgilerini sayfaya gönder
     return render_template(
         'modelInfo.html',
-        test_roc_auc=test_roc_auc,
-        roc_html=roc_html,
-        feature_html=feature_html,
-        train_metrics_json=train_metrics_json,
-        train_metrics_table=train_metrics_table
+        test_roc_auc=model_info['test_roc_auc'],
+        roc_html=model_info['roc_html'],
+        feature_html=model_info['feature_html'],
+        train_metrics_table=model_info['train_metrics_table']
     )
+
+# Kaydedilmiş modellerin listesi
+@app.route('/model-list')
+def model_list():
+    models = list_saved_models()
+    return render_template('modelList.html', models=models)
+
+
+
 
 
 @app.route('/visualization/<int:vis_id>')

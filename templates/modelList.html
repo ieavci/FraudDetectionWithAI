@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Listesi</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        h2 {
+            color: #343a40;
+        }
+        .container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <h2 class="text-center">Kaydedilmiş Modeller</h2>
+        <p class="text-muted text-center">Daha önce eğitilmiş modeller ve detayları aşağıda listelenmiştir.</p>
+        <ul class="list-group">
+            {% for model in models %}
+            <li class="list-group-item">
+                <strong>Model:</strong> Iteration: <span class="text-primary">{{ model.split('_')[1] }}</span>, 
+                Depth: <span class="text-primary">{{ model.split('_')[2] }}</span>, 
+                Learning Rate: <span class="text-primary">{{ model.split('_')[3] }}</span>, 
+                Random Seed: <span class="text-primary">{{ model.split('_')[4] }}</span>
+                <a href="/model-info/{{ model }}" class="btn btn-link float-end">Model Detayları</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
