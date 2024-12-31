@@ -1,51 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fraud Detection Model</title>
+    <title>Fraud Detection Model - CatBoost Performans Analizi</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    
 
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f4f7fc;
+            font-family: Arial, sans-serif;
         }
 
         h2,
         h3 {
-            color: #343a40;
+            color: #2c3e50;
         }
 
         .container {
             background: #ffffff;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
         }
 
         pre {
-            background: #e9ecef;
-            padding: 1rem;
-            border-radius: 5px;
+            background: #f1f3f5;
+            padding: 1.5rem;
+            border-radius: 8px;
             overflow-x: auto;
+            border: 1px solid #dee2e6;
+        }
+
+        .list-group-item {
+            background-color: #f8f9fa;
+            border: none;
+        }
+
+        .table thead th {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .badge {
+            font-size: 1rem;
         }
     </style>
 </head>
 
 <body>
+    <div id="navbar py-3">
+        {% include "navbar.html" %}
+    </div>
     <div class="container my-5">
-        <h2 class="text-center">Fraud Detection Model Bilgileri</h2>
-        <p class="text-muted text-center">Makine öğrenimi model performansı ve detaylı analizler.</p>
+        <h2 class="text-center">CatBoost Fraud Detection Model Performansı</h2>
+        <p class="text-muted text-center">Modelin performansı ve detaylı analizleri hakkında kapsamlı bir inceleme.</p>
 
         <!-- Model Performansı -->
         <section class="my-5">
-            <h3>Model Performansı</h3>
+            <h3>Model Performans Özeti</h3>
             <ul class="list-group">
                 <li class="list-group-item">
-                    <strong>Test ROC-AUC Skoru:</strong> {{ test_roc_auc }}
+                    <strong>Test ROC-AUC Skoru:</strong>
+                    <span class="badge bg-primary">{{ test_roc_auc }}</span>
+                    <p class="mt-2">ROC-AUC skoru, modelin pozitif ve negatif sınıfları ayırt etme yeteneğini ölçer. 1'e
+                        yakın bir değer, modelin daha iyi performans gösterdiğini belirtir. Bu modeldeki skora bakarak
+                        modelin genel sınıflandırma başarısını değerlendirebiliriz.</p>
                 </li>
             </ul>
         </section>
@@ -53,6 +82,14 @@
         <!-- Eğitim Metrikleri -->
         <section class="my-5">
             <h3>Eğitim Metrikleri</h3>
+            <p><strong>Precision (Kesinlik):</strong> Modelin pozitif tahminlerinin ne kadar doğru olduğunu gösterir.
+                Yüksek bir precision değeri, daha az yanlış pozitif olduğunu gösterir.</p>
+            <p><strong>Recall (Hassasiyet):</strong> Modelin gerçek pozitif örnekleri ne kadar doğru tespit ettiğini
+                ölçer. Yüksek recall, daha az yanlış negatif olduğunu gösterir.</p>
+            <p><strong>F1-Score:</strong> Precision ve recall'un harmonik ortalamasıdır. Bu metrik, modelin hem
+                doğruluğunu hem de hatalarını dikkate alarak dengeli bir performans ölçümü sunar.</p>
+            <p><strong>Support:</strong> Her bir sınıfın veri setindeki örnek sayısını belirtir. Bu metrik, modelin her
+                sınıf üzerinde nasıl performans gösterdiğini anlamaya yardımcı olur.</p>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -69,21 +106,34 @@
             </table>
         </section>
 
-        <!-- ROC Curve -->
+        <!-- ROC Eğrisi -->
         <section class="my-5">
-            <h3>ROC Curve</h3>
+            <h3>ROC Eğrisi</h3>
+            <p>ROC eğrisi, sınıflandırıcının farklı eşik değerlerinde nasıl performans gösterdiğini görsel olarak temsil
+                eder. ROC eğrisinin altındaki alan (AUC), modelin sınıflar arasında ne kadar iyi ayrım yaptığına dair
+                bir göstergedir. AUC değeri ne kadar büyükse, model o kadar iyi performans gösterir.</p>
             <div>
                 {{ roc_html | safe }}
             </div>
         </section>
 
-        <!-- Feature Importances -->
+        <!-- Özellik Önemlilikleri -->  
         <section class="my-5">
-            <h3>Feature Importances</h3>
+            <h3>Özellik Önemlilikleri</h3>
+            <p>Özelliklerin önemliliği, modelin tahminlerini yaparken hangi değişkenlerin daha fazla etkili olduğunu
+                gösterir. Özelliklerin yüksek önemi, modelin tahminlerine güçlü bir şekilde etki ettiğini gösterir. Bu
+                bölümde, modelin daha fazla odaklandığı ve etkili olduğu özellikler hakkında bilgi verilmektedir.</p>
             <div>
                 {{ feature_html | safe }}
             </div>
         </section>
+
+        <div id="modelInsights">
+            {%   include 'modelInsights.html' %}
+        </div>
+        
+
+
     </div>
 
     <!-- Bootstrap JS -->

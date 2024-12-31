@@ -1,0 +1,108 @@
+<section class="my-5">
+    <h3>Ekstra Model İçgörüleri</h3>
+    <p class="text-muted">Model iyileştirmeleri, hiperparametre ayarları ve eğitim süreci hakkında önemli
+        ipuçları ve öneriler.</p>
+
+    <!-- Accordion Container -->
+    <div class="accordion" id="extraInsightsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Hiperparametre Ayarları
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                data-bs-parent="#extraInsightsAccordion">
+                <div class="accordion-body" style="font-size: 0.875rem;">
+                    <p>CatBoost modelinin performansını artırmak için hiperparametre ayarlarını doğru yapmak çok
+                        önemlidir. Modelin doğruluğunu ve genelleme kabiliyetini artıran birkaç önemli
+                        hiperparametre vardır:</p>
+                    <ul>
+                        <li><strong>Iterations (İterasyon Sayısı)</strong>: Modelin kaç iterasyonla (ağaç ile)
+                            eğitileceğini belirler...</li>
+                        <li><strong>Learning Rate (Öğrenme Hızı)</strong>: Modelin her iterasyonda yaptığı
+                            güncellemenin büyüklüğünü belirler...</li>
+                        <li><strong>Depth (Ağaç Derinliği)</strong>: Karar ağaçlarının derinliğini belirler...
+                        </li>
+                        <li><strong>L2 Leaf Reg (L2 Düzenleme)</strong>: Modelin aşırı öğrenmesini (overfitting)
+                            engellemeye yardımcı olan bir düzenleme parametresidir...</li>
+                        <li><strong>Border Count (Sınır Sayısı)</strong>: Sürekli özellikleri kesmek için
+                            kullanılacak sınır sayısını belirler...</li>
+                        <li><strong>Feature Fraction (Özellik Payı)</strong>: Her iterasyonda kullanılan
+                            özelliklerin oranını belirler...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Erken Durdurma (Early Stopping)
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                data-bs-parent="#extraInsightsAccordion">
+                <div class="accordion-body" style="font-size: 0.875rem;">
+                    <p>Erken durdurma, modelin aşırı öğrenmesini (overfitting) engellemek için eğitim sırasında
+                        modelin doğruluğu belirli bir sayıda iterasyondan sonra iyileşmediğinde eğitimi
+                        durdurmaya yardımcı olur...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Modelin Eğitim Süresi Optimizasyonu
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                data-bs-parent="#extraInsightsAccordion">
+                <div class="accordion-body" style="font-size: 0.875rem;">
+                    <p>Modelin eğitim süresi, kullanılan hiperparametrelerle doğrudan ilişkilidir. Eğitim
+                        süresini optimize etmek için aşağıdaki stratejiler kullanılabilir...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    Donanım Optimizasyonları
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                data-bs-parent="#extraInsightsAccordion">
+                <div class="accordion-body" style="font-size: 0.875rem;">
+                    <p>CatBoost, eğitim süresini hızlandırmak için GPU kullanımını destekler. GPU desteği, büyük
+                        veri setleri üzerinde eğitim yapılırken modelin hızını artırabilir...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                    Hiperparametre Arama Yöntemleri
+                </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
+                data-bs-parent="#extraInsightsAccordion">
+                <div class="accordion-body" style="font-size: 0.875rem;">
+                    <p>Hiperparametre optimizasyonu, modelin performansını artırmak için kullanılan önemli bir
+                        tekniktir. Hiperparametre ayarları için aşağıdaki yöntemler kullanılabilir...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4 text-muted">Yukarıdaki öneriler, modelin genel doğruluğunu artırmaya yardımcı olmak için
+        dikkate alınması gereken önemli faktörleri ve iyileştirme stratejilerini içermektedir. Bu adımlar,
+        CatBoost'un maksimum potansiyeline ulaşmasına yardımcı olacaktır.</p>
+</section>

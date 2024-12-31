@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,16 +14,20 @@
 </head>
 
 <body>
-    <div id="header">
-        {%   include 'header.html' %}
+    <div id="navbar ">
+        {% include "navbar.html" %}
     </div>
-    <div id="dataInfo">
-        {% include 'dataInfo.html' %}
+    <div class="my-5">
+        <div id="header">
+            {% include 'header.html' %}
+        </div>
+        <div id="dataInfo">
+            {% include 'dataInfo.html' %}
+        </div>
+        <div id="dataGraphs">
+            {% include 'dataGraphs.html' %}
+        </div>
     </div>
-    <div id="dataGraphs">
-        {% include 'dataGraphs.html' %}
-    </div>
-
     <script>
         $(document).on('click', '.visualization-link', function (e) {
             e.preventDefault();
@@ -35,4 +40,5 @@
         });
     </script>
 </body>
+
 </html>
