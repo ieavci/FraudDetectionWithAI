@@ -75,6 +75,7 @@ def generate_visualizations():
     fig7 = px.scatter(train_data, x="long", y="lat", color="is_fraud", title="Coğrafi Dağılım ve Sahtecilik", labels={"long": "Boylam", "lat": "Enlem", "is_fraud": "Sahte mi?"})
     visualizations.append(fig7.to_html(full_html=False))
 
+    
     return visualizations
 
 
@@ -96,7 +97,39 @@ def generate_additional_visualizations():
     fig1 = px.line(transaction_counts, title="Zaman İçinde İşlem Sıklığı", labels={"value": "İşlem Sayısı", "trans_date": "Tarih"})
     additional_visualizations.append(fig1.to_html(full_html=False))
     
-    # Diğer grafikler aynı sırayla eklenir...
+        # Zaman içinde sahte işlem sıklığı
+    fraud_counts = train_data[train_data['is_fraud'] == 1].groupby('trans_date').size()
+    fig8 = px.line(fraud_counts, title="Zaman İçinde Sahte İşlem Sıklığı", labels={"value": "Sahte İşlem Sayısı", "trans_date": "Tarih"})
+    additional_visualizations.append(fig8.to_html(full_html=False))
+
+    # Son işlemden bu yana geçen süre ve sahtecilik ilişkisi
+    train_data['time_diff'] = train_data['unix_time'].diff().fillna(0)
+    fig9 = px.box(train_data, x="is_fraud", y="time_diff", title="Son İşlemden Bu Yana Geçen Süre ve Sahtecilik İlişkisi", labels={"is_fraud": "Sahte mi?", "time_diff": "Geçen Süre (saniye)"})
+    additional_visualizations.append(fig9.to_html(full_html=False))
+
+    # Kategoriye göre işlem tutarı
+    fig10 = px.box(train_data, x="category", y="amt", title="Kategoriye Göre İşlem Tutarı", labels={"category": "Kategori", "amt": "İşlem Tutarı"})
+    additional_visualizations.append(fig10.to_html(full_html=False))
+
+    # Yaş ve cinsiyet dağılımı
+    train_data['age'] = (pd.to_datetime('today') - pd.to_datetime(train_data['dob'])).dt.days // 365
+    fig11 = px.scatter(train_data, x="age", y="gender", color="is_fraud", title="Yaş ve Cinsiyet Dağılımı", labels={"age": "Yaş", "gender": "Cinsiyet", "is_fraud": "Sahte mi?"})
+    additional_visualizations.append(fig11.to_html(full_html=False))
+
+    # Şehir nüfusu ve işlem tutarı karşılaştırması
+    fig12 = px.scatter(train_data, x="city_pop", y="amt", color="is_fraud", title="Şehir Nüfusu ve İşlem Tutarı Karşılaştırması", labels={"city_pop": "Şehir Nüfusu", "amt": "İşlem Tutarı", "is_fraud": "Sahte mi?"})
+    additional_visualizations.append(fig12.to_html(full_html=False))
+
+    # Kart numarasına göre işlem sıklığı
+    card_counts = train_data.groupby('cc_num').size().reset_index(name="count")
+    fig13 = px.bar(card_counts, x="cc_num", y="count", title="Kart Numarasına Göre İşlem Sıklığı", labels={"cc_num": "Kart Numarası", "count": "İşlem Sayısı"})
+    additional_visualizations.append(fig13.to_html(full_html=False))
+
+    # Sahtecilik ve işlem zamanı dağılımı
+    fig14 = px.density_heatmap(train_data, x="trans_day", y="trans_hour", z="is_fraud", title="Sahtecilik ve İşlem Zamanı Dağılımı", labels={"trans_day": "Gün", "trans_hour": "Saat", "is_fraud": "Sahtecilik"})
+    additional_visualizations.append(fig14.to_html(full_html=False))
+
+
 
     return additional_visualizations
 

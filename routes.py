@@ -81,10 +81,9 @@ def model_list():
 
 
 
-
 @app.route('/visualization/<int:vis_id>')
 def serve_visualization(vis_id):
     visualizations = generate_visualizations() + generate_additional_visualizations()
     if 0 <= vis_id < len(visualizations):
         return visualizations[vis_id]
-    return "Visualization not found", 404
+    return f"Visualization {vis_id} bulunamadı. Toplam görselleştirme sayısı: {len(visualizations)}", 404
