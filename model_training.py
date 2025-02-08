@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from catboost import CatBoostClassifier
 from sklearn.metrics import classification_report, roc_auc_score, roc_curve
 import plotly.graph_objects as go
 import plotly.express as px
@@ -67,29 +67,33 @@ def train_model(iterations, depth, learning_rate, random_seed):
     X_test = test_data.drop('is_fraud', axis=1)
     y_test = test_data['is_fraud']
 
-    # Model oluşturma
-    model = RandomForestClassifier(
-        n_estimators=iterations,
-        max_depth=depth,
-        random_state=random_seed
+    # CatBoost modelini oluşturma
+    catboost_model = CatBoostClassifier(
+        iterations=iterations,
+        depth=depth,
+        learning_rate=learning_rate,
+        random_seed=random_seed,
+        cat_features=[col for col in X_train.select_dtypes(include=['category']).columns]
     )
-    model.fit(X_train, y_train)
+
+    # Modeli eğitme
+    catboost_model.fit(X_train, y_train)
 
     # Tahminler ve metrikler
-    y_pred = model.predict(X_test)
-    y_pred_proba = model.predict_proba(X_test)[:, 1]
+    y_pred = catboost_model.predict(X_test)
+    y_pred_proba = catboost_model.predict_proba(X_test)[:, 1]
     train_metrics = classification_report(y_test, y_pred, output_dict=True)
     test_roc_auc = roc_auc_score(y_test, y_pred_proba)
 
     # Görselleri oluşturma
     roc_html = create_roc_curve(y_test, y_pred_proba)
-    feature_html = create_feature_importances(model, X_train.columns)
+    feature_html = create_feature_importances(catboost_model, X_train.columns)
     train_metrics_table = metrics_to_table(train_metrics)
 
     # Model bilgileri
     model_id = f"model_{iterations}_{depth}_{learning_rate}_{random_seed}"
     model_info = {
-        'model': model,
+        'model': catboost_model,
         'train_metrics_table': train_metrics_table,
         'test_roc_auc': test_roc_auc,
         'roc_html': roc_html,
